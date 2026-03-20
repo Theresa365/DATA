@@ -1,0 +1,12 @@
+{
+  "rows": 618,
+  "unique_fault_numbers": 306,
+  "chrono_anomaly_rows": 7,
+  "missing_trip_time_rows": 16,
+  "missing_reclose_rows": 5,
+  "weather_values": {
+    "clear": 406,
+    "rainy/stormy": 106,
+    "cloudy": 106
+  }
+}

@@ -1,0 +1,7 @@
+[console_scripts]
+build-events = scada_faults.cli:main_build_events
+draft-stage2-labels = scada_faults.cli:main_draft_stage2_labels
+prepare-data = scada_faults.cli:main_prepare_data
+report-results = scada_faults.cli:main_report_results
+train-stage1 = scada_faults.cli:main_train_stage1
+train-stage2 = scada_faults.cli:main_train_stage2

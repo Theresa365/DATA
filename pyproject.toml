@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scada-faults"
+version = "0.1.0"
+description = "Event-level SCADA fault classification for power distribution systems."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "matplotlib>=3.8",
+  "numpy>=1.26",
+  "openpyxl>=3.1",
+  "pandas>=2.2",
+  "scikit-learn>=1.4",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+extras = [
+  "lightgbm>=4.0",
+  "shap>=0.45",
+  "xgboost>=2.0",
+]
+
+[project.scripts]
+prepare-data = "scada_faults.cli:main_prepare_data"
+build-events = "scada_faults.cli:main_build_events"
+draft-stage2-labels = "scada_faults.cli:main_draft_stage2_labels"
+train-stage1 = "scada_faults.cli:main_train_stage1"
+train-stage2 = "scada_faults.cli:main_train_stage2"
+report-results = "scada_faults.cli:main_report_results"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

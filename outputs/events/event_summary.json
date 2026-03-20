@@ -1,0 +1,20 @@
+{
+  "distribution": {
+    "events": 105,
+    "chrono_anomalies": 2,
+    "stage1_label_counts": {
+      "permanent": 90,
+      "transient": 8,
+      "sustained": 7
+    }
+  },
+  "system": {
+    "events": 368,
+    "chrono_anomalies": 3,
+    "stage1_label_counts": {
+      "permanent": 248,
+      "transient": 66,
+      "sustained": 54
+    }
+  }
+}

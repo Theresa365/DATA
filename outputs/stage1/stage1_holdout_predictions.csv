@@ -1,0 +1,22 @@
+fault_id,fault_no,event_date,location_primary,actual_label,majority-baseline,rule-baseline,logistic-regression,decision-tree,random-forest
+distribution::067/25::2025-02-10::09:22,067/25,2025-02-10,Tlokweng,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::061/25::2025-02-19::12:26,061/25,2025-02-19,Gaphwatshwa,Non-permanent,Permanent,Permanent,Permanent,Non-permanent,Permanent
+distribution::062/25::2025-02-19::12:40,062/25,2025-02-19,Broadhurst,Non-permanent,Permanent,Permanent,Permanent,Non-permanent,Non-permanent
+distribution::072/25::2025-02-28::11:20,072/25,2025-02-28,Mogoditshane,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::108/25::2025-03-05::10:20,108/25,2025-03-05,Maun,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::078/25::2025-03-13::13:01,078/25,2025-03-13,Francistown,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::084/25::2025-03-13::04:46,084/25,2025-03-13,F/Town West,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::084/25::2025-03-13::06:23,084/25,2025-03-13,F/Town West,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::88/25::2025-03-22::15:05,88/25,2025-03-22,Orapa 2,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::091/25::2025-03-28::19:59,091/25,2025-03-28,Gaphatshwa,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::099/25::2025-04-19::09:27,099/25,2025-04-19,Broadhurst,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::102/25::2025-04-23::22:13,102/25,2025-04-23,Mochudi,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::103/25::2025-04-30::07:15,103/25,2025-04-30,Jwaneng,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::104/25::2025-04-30::09:12,104/25,2025-04-30,Jwaneng,Non-permanent,Permanent,Permanent,Permanent,Non-permanent,Non-permanent
+distribution::102/25::2025-05-23::22:13,102/25,2025-05-23,Mochudi,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::128/25::2025-06-25::17:31,128/25,2025-06-25,Molepolole,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::123/25::2025-08-06::11:52,123/25,2025-08-06,Phakalane,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::077/25::2025-09-03::18:30,077/25,2025-09-03,"Government Enclave, 132/11kV T1",Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::095/25::2025-09-04::06:46,095/25,2025-09-04,Jwaneng,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::097/25::2025-12-04::10:53,097/25,2025-12-04,Jwaneng,Permanent,Permanent,Permanent,Permanent,Permanent,Permanent
+distribution::098/25::2025-12-04::14:24,098/25,2025-12-04,Jwaneng,Non-permanent,Permanent,Permanent,Permanent,Non-permanent,Non-permanent

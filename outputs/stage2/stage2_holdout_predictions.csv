@@ -1,0 +1,21 @@
+fault_id,fault_no,event_date,location_primary,actual_label,majority-baseline,logistic-regression,random-forest
+distribution::075/25::2025-02-03::07:58,075/25,2025-02-03,Kanye,operational-other,operational-other,operational-other,operational-other
+distribution::061/25::2025-02-19::12:26,061/25,2025-02-19,Gaphwatshwa,ground-related,operational-other,ground-related,operational-other
+distribution::062/25::2025-02-19::12:40,062/25,2025-02-19,Broadhurst,ground-related,operational-other,ground-related,operational-other
+distribution::108/25::2025-03-05::10:20,108/25,2025-03-05,Maun,operational-other,operational-other,operational-other,operational-other
+distribution::078/25::2025-03-13::13:01,078/25,2025-03-13,Francistown,ground-related,operational-other,ground-related,operational-other
+distribution::084/25::2025-03-13::04:46,084/25,2025-03-13,F/Town West,operational-other,operational-other,operational-other,operational-other
+distribution::084/25::2025-03-13::06:23,084/25,2025-03-13,F/Town West,operational-other,operational-other,operational-other,operational-other
+distribution::88/25::2025-03-22::15:05,88/25,2025-03-22,Orapa 2,ground-related,operational-other,ground-related,operational-other
+distribution::091/25::2025-03-28::19:59,091/25,2025-03-28,Gaphatshwa,operational-other,operational-other,operational-other,operational-other
+distribution::099/25::2025-04-19::09:27,099/25,2025-04-19,Broadhurst,operational-other,operational-other,operational-other,operational-other
+distribution::102/25::2025-04-23::22:13,102/25,2025-04-23,Mochudi,ground-related,operational-other,ground-related,operational-other
+distribution::103/25::2025-04-30::07:15,103/25,2025-04-30,Jwaneng,ground-related,operational-other,ground-related,operational-other
+distribution::104/25::2025-04-30::09:12,104/25,2025-04-30,Jwaneng,operational-other,operational-other,operational-other,operational-other
+distribution::102/25::2025-05-23::22:13,102/25,2025-05-23,Mochudi,ground-related,operational-other,ground-related,operational-other
+distribution::128/25::2025-06-25::17:31,128/25,2025-06-25,Molepolole,ground-related,operational-other,ground-related,operational-other
+distribution::123/25::2025-08-06::11:52,123/25,2025-08-06,Phakalane,operational-other,operational-other,operational-other,operational-other
+distribution::077/25::2025-09-03::18:30,077/25,2025-09-03,"Government Enclave, 132/11kV T1",operational-other,operational-other,operational-other,operational-other
+distribution::095/25::2025-09-04::06:46,095/25,2025-09-04,Jwaneng,operational-other,operational-other,operational-other,operational-other
+distribution::097/25::2025-12-04::10:53,097/25,2025-12-04,Jwaneng,ground-related,operational-other,ground-related,operational-other
+distribution::098/25::2025-12-04::14:24,098/25,2025-12-04,Jwaneng,ground-related,operational-other,ground-related,operational-other

@@ -1,0 +1,455 @@
+{
+  "selected_model": "random-forest",
+  "selected_threshold": 0.5499999999999999,
+  "train_events": 82,
+  "holdout_events": 21,
+  "chronology": {
+    "train_start": "2023-01-06",
+    "train_end": "2025-02-03",
+    "holdout_start": "2025-02-10",
+    "holdout_end": "2025-12-04"
+  },
+  "comparisons": {
+    "majority-baseline": {
+      "accuracy": 0.8095238095238095,
+      "macro_f1": 0.4473684210526316,
+      "weighted_f1": 0.7243107769423559,
+      "per_class": {
+        "Permanent": {
+          "precision": 0.8095238095238095,
+          "recall": 1.0,
+          "f1": 0.8947368421052632,
+          "support": 17
+        },
+        "Non-permanent": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 4
+        }
+      },
+      "confusion_matrix": [
+        [
+          17,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ]
+    },
+    "rule-baseline": {
+      "accuracy": 0.8095238095238095,
+      "macro_f1": 0.4473684210526316,
+      "weighted_f1": 0.7243107769423559,
+      "per_class": {
+        "Permanent": {
+          "precision": 0.8095238095238095,
+          "recall": 1.0,
+          "f1": 0.8947368421052632,
+          "support": 17
+        },
+        "Non-permanent": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 4
+        }
+      },
+      "confusion_matrix": [
+        [
+          17,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ]
+    },
+    "logistic-regression": {
+      "accuracy": 0.8095238095238095,
+      "macro_f1": 0.4473684210526316,
+      "weighted_f1": 0.7243107769423559,
+      "per_class": {
+        "Permanent": {
+          "precision": 0.8095238095238095,
+          "recall": 1.0,
+          "f1": 0.8947368421052632,
+          "support": 17
+        },
+        "Non-permanent": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 4
+        }
+      },
+      "confusion_matrix": [
+        [
+          17,
+          0
+        ],
+        [
+          4,
+          0
+        ]
+      ]
+    },
+    "decision-tree": {
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "weighted_f1": 1.0,
+      "per_class": {
+        "Permanent": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 17
+        },
+        "Non-permanent": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 4
+        }
+      },
+      "confusion_matrix": [
+        [
+          17,
+          0
+        ],
+        [
+          0,
+          4
+        ]
+      ]
+    },
+    "random-forest": {
+      "accuracy": 0.9523809523809523,
+      "macro_f1": 0.9142857142857143,
+      "weighted_f1": 0.9496598639455781,
+      "per_class": {
+        "Permanent": {
+          "precision": 0.9444444444444444,
+          "recall": 1.0,
+          "f1": 0.9714285714285714,
+          "support": 17
+        },
+        "Non-permanent": {
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1": 0.8571428571428571,
+          "support": 4
+        }
+      },
+      "confusion_matrix": [
+        [
+          17,
+          0
+        ],
+        [
+          1,
+          3
+        ]
+      ]
+    }
+  },
+  "cv_results": [
+    {
+      "model_name": "logistic-regression",
+      "cv_macro_f1": 0.8935185185185185,
+      "cv_weighted_f1": 0.935829307568438,
+      "cv_folds": [
+        {
+          "accuracy": 0.9130434782608695,
+          "macro_f1": 0.8722222222222222,
+          "weighted_f1": 0.9067632850241545,
+          "per_class": {
+            "Permanent": {
+              "precision": 0.8947368421052632,
+              "recall": 1.0,
+              "f1": 0.9444444444444444,
+              "support": 17
+            },
+            "Non-permanent": {
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "f1": 0.8,
+              "support": 6
+            }
+          },
+          "confusion_matrix": [
+            [
+              17,
+              0
+            ],
+            [
+              2,
+              4
+            ]
+          ],
+          "fold": 1
+        },
+        {
+          "accuracy": 0.9130434782608695,
+          "macro_f1": 0.8083333333333333,
+          "weighted_f1": 0.9007246376811595,
+          "per_class": {
+            "Permanent": {
+              "precision": 0.9047619047619048,
+              "recall": 1.0,
+              "f1": 0.95,
+              "support": 19
+            },
+            "Non-permanent": {
+              "precision": 1.0,
+              "recall": 0.5,
+              "f1": 0.6666666666666666,
+              "support": 4
+            }
+          },
+          "confusion_matrix": [
+            [
+              19,
+              0
+            ],
+            [
+              2,
+              2
+            ]
+          ],
+          "fold": 2
+        },
+        {
+          "accuracy": 1.0,
+          "macro_f1": 1.0,
+          "weighted_f1": 1.0,
+          "per_class": {
+            "Permanent": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 23
+            },
+            "Non-permanent": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 0
+            }
+          },
+          "confusion_matrix": [
+            [
+              23,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "fold": 3
+        }
+      ],
+      "threshold": 0.4166666666666667
+    },
+    {
+      "model_name": "decision-tree",
+      "cv_macro_f1": 0.8083333333333332,
+      "cv_weighted_f1": 0.8760869565217391,
+      "cv_folds": [
+        {
+          "accuracy": 0.7391304347826086,
+          "macro_f1": 0.425,
+          "weighted_f1": 0.6282608695652173,
+          "per_class": {
+            "Permanent": {
+              "precision": 0.7391304347826086,
+              "recall": 1.0,
+              "f1": 0.85,
+              "support": 17
+            },
+            "Non-permanent": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 6
+            }
+          },
+          "confusion_matrix": [
+            [
+              17,
+              0
+            ],
+            [
+              6,
+              0
+            ]
+          ],
+          "fold": 1
+        },
+        {
+          "accuracy": 1.0,
+          "macro_f1": 1.0,
+          "weighted_f1": 1.0,
+          "per_class": {
+            "Permanent": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 19
+            },
+            "Non-permanent": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 4
+            }
+          },
+          "confusion_matrix": [
+            [
+              19,
+              0
+            ],
+            [
+              0,
+              4
+            ]
+          ],
+          "fold": 2
+        },
+        {
+          "accuracy": 1.0,
+          "macro_f1": 1.0,
+          "weighted_f1": 1.0,
+          "per_class": {
+            "Permanent": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 23
+            },
+            "Non-permanent": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 0
+            }
+          },
+          "confusion_matrix": [
+            [
+              23,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "fold": 3
+        }
+      ],
+      "threshold": 0.3
+    },
+    {
+      "model_name": "random-forest",
+      "cv_macro_f1": 0.899122807017544,
+      "cv_weighted_f1": 0.9305873379099924,
+      "cv_folds": [
+        {
+          "accuracy": 0.8260869565217391,
+          "macro_f1": 0.6973684210526316,
+          "weighted_f1": 0.7917620137299771,
+          "per_class": {
+            "Permanent": {
+              "precision": 0.8095238095238095,
+              "recall": 1.0,
+              "f1": 0.8947368421052632,
+              "support": 17
+            },
+            "Non-permanent": {
+              "precision": 1.0,
+              "recall": 0.3333333333333333,
+              "f1": 0.5,
+              "support": 6
+            }
+          },
+          "confusion_matrix": [
+            [
+              17,
+              0
+            ],
+            [
+              4,
+              2
+            ]
+          ],
+          "fold": 1
+        },
+        {
+          "accuracy": 1.0,
+          "macro_f1": 1.0,
+          "weighted_f1": 1.0,
+          "per_class": {
+            "Permanent": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 19
+            },
+            "Non-permanent": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 4
+            }
+          },
+          "confusion_matrix": [
+            [
+              19,
+              0
+            ],
+            [
+              0,
+              4
+            ]
+          ],
+          "fold": 2
+        },
+        {
+          "accuracy": 1.0,
+          "macro_f1": 1.0,
+          "weighted_f1": 1.0,
+          "per_class": {
+            "Permanent": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 23
+            },
+            "Non-permanent": {
+              "precision": 0.0,
+              "recall": 0.0,
+              "f1": 0.0,
+              "support": 0
+            }
+          },
+          "confusion_matrix": [
+            [
+              23,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ],
+          "fold": 3
+        }
+      ],
+      "threshold": 0.5499999999999999
+    }
+  ]
+}
