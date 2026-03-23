@@ -66,6 +66,14 @@ CATEGORICAL_FEATURES = [
 
 TEXT_FEATURES = ["comments_concat", "apparatus_concat"]
 MODEL_FEATURES = NUMERIC_FEATURES + CATEGORICAL_FEATURES + TEXT_FEATURES
+FEATURE_SET_REGISTRY = {
+    "all_features": MODEL_FEATURES,
+    "structured_only": NUMERIC_FEATURES + CATEGORICAL_FEATURES,
+    "text_only": TEXT_FEATURES,
+    "no_text": NUMERIC_FEATURES + CATEGORICAL_FEATURES,
+    "no_numeric": CATEGORICAL_FEATURES + TEXT_FEATURES,
+    "no_categorical": NUMERIC_FEATURES + TEXT_FEATURES,
+}
 
 
 @dataclass
@@ -74,9 +82,17 @@ class TrainableModelSpec:
     estimator_factory: Callable[[], Pipeline]
 
 
-def _make_preprocessor() -> ColumnTransformer:
-    return ColumnTransformer(
-        transformers=[
+def _selected_features(feature_names: list[str], selected: list[str]) -> list[str]:
+    return [feature_name for feature_name in feature_names if feature_name in selected]
+
+
+def _make_preprocessor(selected_features: list[str] | None = None) -> ColumnTransformer:
+    feature_selection = selected_features or MODEL_FEATURES
+    transformers: list[tuple[str, object, object]] = []
+
+    numeric_features = _selected_features(NUMERIC_FEATURES, feature_selection)
+    if numeric_features:
+        transformers.append(
             (
                 "numeric",
                 Pipeline(
@@ -85,8 +101,13 @@ def _make_preprocessor() -> ColumnTransformer:
                         ("scaler", StandardScaler(with_mean=False)),
                     ]
                 ),
-                NUMERIC_FEATURES,
-            ),
+                numeric_features,
+            )
+        )
+
+    categorical_features = _selected_features(CATEGORICAL_FEATURES, feature_selection)
+    if categorical_features:
+        transformers.append(
             (
                 "categorical",
                 Pipeline(
@@ -95,16 +116,20 @@ def _make_preprocessor() -> ColumnTransformer:
                         ("onehot", OneHotEncoder(handle_unknown="ignore")),
                     ]
                 ),
-                CATEGORICAL_FEATURES,
-            ),
-            ("comments", TfidfVectorizer(max_features=80, ngram_range=(1, 2)), "comments_concat"),
-            ("apparatus", TfidfVectorizer(max_features=60, ngram_range=(1, 2)), "apparatus_concat"),
-        ]
-    )
+                categorical_features,
+            )
+        )
+
+    if "comments_concat" in feature_selection:
+        transformers.append(("comments", TfidfVectorizer(max_features=80, ngram_range=(1, 2)), "comments_concat"))
+    if "apparatus_concat" in feature_selection:
+        transformers.append(("apparatus", TfidfVectorizer(max_features=60, ngram_range=(1, 2)), "apparatus_concat"))
+
+    return ColumnTransformer(transformers=transformers)
 
 
-def _make_classifier_pipeline(classifier) -> Pipeline:
-    return Pipeline(steps=[("preprocessor", _make_preprocessor()), ("classifier", classifier)])
+def _make_classifier_pipeline(classifier, selected_features: list[str] | None = None) -> Pipeline:
+    return Pipeline(steps=[("preprocessor", _make_preprocessor(selected_features)), ("classifier", classifier)])
 
 
 def stage1_model_specs() -> list[TrainableModelSpec]:
@@ -253,6 +278,164 @@ def compute_metrics(y_true: pd.Series, y_pred: pd.Series, labels: list[str]) -> 
         "confusion_matrix": confusion_matrix(y_true, y_pred, labels=labels).tolist(),
     }
     return metrics
+
+
+def bootstrap_metric_confidence_intervals(
+    y_true: pd.Series,
+    y_pred: pd.Series,
+    labels: list[str],
+    *,
+    n_bootstrap: int = 1000,
+    confidence_level: float = 0.95,
+) -> dict[str, dict[str, float]]:
+    if len(y_true) != len(y_pred):
+        raise ValueError("y_true and y_pred must be the same length for bootstrap intervals.")
+
+    rng = np.random.default_rng(DEFAULT_RANDOM_STATE)
+    y_true_array = np.asarray(y_true)
+    y_pred_array = np.asarray(y_pred)
+    alpha = (1.0 - confidence_level) / 2.0
+    metric_samples = {"accuracy": [], "macro_f1": [], "weighted_f1": []}
+
+    for _ in range(n_bootstrap):
+        sampled_idx = rng.integers(0, len(y_true_array), len(y_true_array))
+        sampled_true = pd.Series(y_true_array[sampled_idx])
+        sampled_pred = pd.Series(y_pred_array[sampled_idx])
+        metrics = compute_metrics(sampled_true, sampled_pred, labels)
+        for metric_name in metric_samples:
+            metric_samples[metric_name].append(float(metrics[metric_name]))
+
+    return {
+        metric_name: {
+            "lower": float(np.quantile(samples, alpha)),
+            "median": float(np.quantile(samples, 0.5)),
+            "upper": float(np.quantile(samples, 1.0 - alpha)),
+        }
+        for metric_name, samples in metric_samples.items()
+    }
+
+
+def summarize_temporal_backtest(fold_metrics: list[dict[str, object]]) -> dict[str, object]:
+    metric_names = ["accuracy", "macro_f1", "weighted_f1"]
+    summary: dict[str, object] = {"fold_count": len(fold_metrics)}
+    for metric_name in metric_names:
+        values = [float(fold[metric_name]) for fold in fold_metrics]
+        summary[metric_name] = {
+            "mean": float(np.mean(values)),
+            "std": float(np.std(values, ddof=0)),
+            "min": float(np.min(values)),
+            "max": float(np.max(values)),
+        }
+    return summary
+
+
+def run_temporal_backtest(
+    spec: TrainableModelSpec,
+    df: pd.DataFrame,
+    target_column: str,
+    labels: list[str],
+    *,
+    binary_task: bool,
+    selected_features: list[str] | None = None,
+) -> list[dict[str, object]]:
+    X = df[selected_features or MODEL_FEATURES]
+    y = df[target_column]
+    fold_rows: list[dict[str, object]] = []
+
+    for fold_number, (train_idx, test_idx) in enumerate(rolling_origin_splits(y), start=1):
+        y_train = y.iloc[train_idx]
+        if y_train.nunique() < min(2, y.nunique()):
+            continue
+        estimator = spec.estimator_factory() if selected_features is None else _make_classifier_pipeline(
+            clone(spec.estimator_factory().named_steps["classifier"]),
+            selected_features,
+        )
+        estimator.fit(X.iloc[train_idx], y_train)
+        if binary_task:
+            probabilities = estimator.predict_proba(X.iloc[test_idx])
+            positive_index = list(estimator.classes_).index("Permanent")
+            threshold, y_pred = choose_binary_threshold(y.iloc[test_idx], probabilities[:, positive_index])
+        else:
+            threshold = None
+            y_pred = estimator.predict(X.iloc[test_idx])
+        metrics = compute_metrics(y.iloc[test_idx], pd.Series(y_pred, index=y.iloc[test_idx].index), labels=labels)
+        metrics["fold"] = fold_number
+        metrics["test_size"] = int(len(test_idx))
+        metrics["train_size"] = int(len(train_idx))
+        metrics["test_start"] = str(df.iloc[test_idx]["event_date"].min().date())
+        metrics["test_end"] = str(df.iloc[test_idx]["event_date"].max().date())
+        if threshold is not None:
+            metrics["threshold"] = float(threshold)
+        fold_rows.append(metrics)
+
+    return fold_rows
+
+
+def build_error_analysis(
+    holdout_df: pd.DataFrame,
+    y_true: pd.Series,
+    y_pred: pd.Series,
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    error_df = holdout_df[
+        [
+            "fault_id",
+            "fault_no",
+            "event_date",
+            "location_primary",
+            "weather",
+            "season",
+            "substation_area",
+            "row_count",
+            "unique_apparatus_count",
+            "comments_concat",
+            "apparatus_concat",
+        ]
+    ].copy()
+    error_df["actual_label"] = y_true.values
+    error_df["predicted_label"] = y_pred.values
+    error_df["is_error"] = error_df["actual_label"] != error_df["predicted_label"]
+
+    summary = {
+        "total_holdout_events": int(len(error_df)),
+        "misclassified_events": int(error_df["is_error"].sum()),
+        "error_rate": float(error_df["is_error"].mean()),
+        "errors_by_weather": error_df.groupby("weather")["is_error"].sum().sort_values(ascending=False).to_dict(),
+        "errors_by_season": error_df.groupby("season")["is_error"].sum().sort_values(ascending=False).to_dict(),
+        "errors_by_area": error_df.groupby("substation_area")["is_error"].sum().sort_values(ascending=False).to_dict(),
+    }
+    return error_df, summary
+
+
+def evaluate_feature_ablations(
+    base_classifier,
+    train_val_df: pd.DataFrame,
+    holdout_df: pd.DataFrame,
+    target_column: str,
+    labels: list[str],
+    *,
+    binary_task: bool,
+) -> list[dict[str, object]]:
+    results: list[dict[str, object]] = []
+    y_train = train_val_df[target_column]
+    y_holdout = holdout_df[target_column]
+
+    for feature_set_name, feature_list in FEATURE_SET_REGISTRY.items():
+        model = _make_classifier_pipeline(clone(base_classifier), feature_list)
+        model.fit(train_val_df[feature_list], y_train)
+        if binary_task:
+            probabilities = model.predict_proba(holdout_df[feature_list])
+            positive_index = list(model.classes_).index("Permanent")
+            threshold, predictions = choose_binary_threshold(y_holdout, probabilities[:, positive_index])
+            metrics = compute_metrics(y_holdout, pd.Series(predictions, index=y_holdout.index), labels)
+            metrics["threshold"] = float(threshold)
+        else:
+            predictions = pd.Series(model.predict(holdout_df[feature_list]), index=y_holdout.index)
+            metrics = compute_metrics(y_holdout, predictions, labels)
+        metrics["feature_set"] = feature_set_name
+        metrics["feature_count"] = len(feature_list)
+        results.append(metrics)
+
+    return sorted(results, key=lambda item: item["macro_f1"], reverse=True)
 
 
 def stage1_rule_baseline(df: pd.DataFrame) -> pd.Series:
@@ -459,6 +642,41 @@ def run_stage1_training(root: Path | None = None) -> dict[str, Path]:
         evaluation_summary["comparisons"][baseline_name] = compute_metrics(y_holdout, predictions, labels)
     for model_name, predictions in holdout_predictions.items():
         evaluation_summary["comparisons"][model_name] = compute_metrics(y_holdout, predictions, labels)
+        evaluation_summary["comparisons"][model_name]["confidence_intervals"] = bootstrap_metric_confidence_intervals(
+            y_holdout,
+            predictions,
+            labels,
+        )
+
+    selected_spec = next(spec for spec in stage1_model_specs() if spec.name == selected_model_name)
+    temporal_backtest = run_temporal_backtest(
+        selected_spec,
+        model_df,
+        target_column="stage1_binary_label",
+        labels=labels,
+        binary_task=True,
+    )
+    evaluation_summary["temporal_backtest"] = {
+        "folds": temporal_backtest,
+        "summary": summarize_temporal_backtest(temporal_backtest),
+    }
+
+    ablation_results = evaluate_feature_ablations(
+        selected_model.named_steps["classifier"],
+        train_val_df,
+        holdout_df,
+        target_column="stage1_binary_label",
+        labels=labels,
+        binary_task=True,
+    )
+    evaluation_summary["feature_ablations"] = ablation_results
+
+    error_analysis_df, error_analysis_summary = build_error_analysis(
+        holdout_df,
+        y_holdout,
+        holdout_predictions[selected_model_name],
+    )
+    evaluation_summary["error_analysis"] = error_analysis_summary
 
     predictions_df = holdout_df[["fault_id", "fault_no", "event_date", "location_primary", "stage1_binary_label"]].copy()
     predictions_df = predictions_df.rename(columns={"stage1_binary_label": "actual_label"})
@@ -471,6 +689,8 @@ def run_stage1_training(root: Path | None = None) -> dict[str, Path]:
     predictions_path = paths.stage1 / "stage1_holdout_predictions.csv"
     model_path = paths.stage1 / f"{selected_model_name}.joblib"
     importance_path = paths.stage1 / "stage1_permutation_importance.csv"
+    ablations_path = paths.stage1 / "stage1_feature_ablations.csv"
+    error_analysis_path = paths.stage1 / "stage1_error_analysis.csv"
     confusion_path = paths.figures / "stage1_confusion_matrix.png"
     shap_note_path = paths.stage1 / "stage1_shap_note.txt"
 
@@ -478,6 +698,8 @@ def run_stage1_training(root: Path | None = None) -> dict[str, Path]:
     predictions_df.to_csv(predictions_path, index=False)
     joblib.dump(selected_model, model_path)
     save_permutation_importance(selected_model, holdout_df[MODEL_FEATURES], y_holdout, importance_path)
+    pd.DataFrame(ablation_results).to_csv(ablations_path, index=False)
+    error_analysis_df.to_csv(error_analysis_path, index=False)
     save_confusion_matrix_figure(
         y_holdout,
         holdout_predictions[selected_model_name],
@@ -492,6 +714,8 @@ def run_stage1_training(root: Path | None = None) -> dict[str, Path]:
         "predictions": predictions_path,
         "model": model_path,
         "importance": importance_path,
+        "ablations": ablations_path,
+        "error_analysis": error_analysis_path,
         "confusion_matrix": confusion_path,
     }
 
@@ -568,6 +792,41 @@ def run_stage2_training(root: Path | None = None) -> dict[str, Path]:
         evaluation_summary["comparisons"][baseline_name] = compute_metrics(y_holdout, predictions, labels)
     for model_name, predictions in holdout_predictions.items():
         evaluation_summary["comparisons"][model_name] = compute_metrics(y_holdout, predictions, labels)
+        evaluation_summary["comparisons"][model_name]["confidence_intervals"] = bootstrap_metric_confidence_intervals(
+            y_holdout,
+            predictions,
+            labels,
+        )
+
+    selected_spec = next(spec for spec in stage2_model_specs() if spec.name == selected_model_name)
+    temporal_backtest = run_temporal_backtest(
+        selected_spec,
+        merged,
+        target_column="stage2_label",
+        labels=labels,
+        binary_task=False,
+    )
+    evaluation_summary["temporal_backtest"] = {
+        "folds": temporal_backtest,
+        "summary": summarize_temporal_backtest(temporal_backtest),
+    }
+
+    ablation_results = evaluate_feature_ablations(
+        selected_model.named_steps["classifier"],
+        train_val_df,
+        holdout_df,
+        target_column="stage2_label",
+        labels=labels,
+        binary_task=False,
+    )
+    evaluation_summary["feature_ablations"] = ablation_results
+
+    error_analysis_df, error_analysis_summary = build_error_analysis(
+        holdout_df,
+        y_holdout,
+        holdout_predictions[selected_model_name],
+    )
+    evaluation_summary["error_analysis"] = error_analysis_summary
 
     predictions_df = holdout_df[["fault_id", "fault_no", "event_date", "location_primary", "stage2_label"]].copy()
     predictions_df = predictions_df.rename(columns={"stage2_label": "actual_label"})
@@ -580,6 +839,8 @@ def run_stage2_training(root: Path | None = None) -> dict[str, Path]:
     predictions_path = paths.stage2 / "stage2_holdout_predictions.csv"
     model_path = paths.stage2 / f"{selected_model_name}.joblib"
     importance_path = paths.stage2 / "stage2_permutation_importance.csv"
+    ablations_path = paths.stage2 / "stage2_feature_ablations.csv"
+    error_analysis_path = paths.stage2 / "stage2_error_analysis.csv"
     confusion_path = paths.figures / "stage2_confusion_matrix.png"
     shap_note_path = paths.stage2 / "stage2_shap_note.txt"
 
@@ -587,6 +848,8 @@ def run_stage2_training(root: Path | None = None) -> dict[str, Path]:
     predictions_df.to_csv(predictions_path, index=False)
     joblib.dump(selected_model, model_path)
     save_permutation_importance(selected_model, holdout_df[MODEL_FEATURES], y_holdout, importance_path)
+    pd.DataFrame(ablation_results).to_csv(ablations_path, index=False)
+    error_analysis_df.to_csv(error_analysis_path, index=False)
     save_confusion_matrix_figure(
         y_holdout,
         holdout_predictions[selected_model_name],
@@ -600,5 +863,7 @@ def run_stage2_training(root: Path | None = None) -> dict[str, Path]:
         "predictions": predictions_path,
         "model": model_path,
         "importance": importance_path,
+        "ablations": ablations_path,
+        "error_analysis": error_analysis_path,
         "confusion_matrix": confusion_path,
     }

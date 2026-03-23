@@ -15,6 +15,8 @@
 - Selected threshold: 0.55
 - Holdout macro F1: 0.914
 - Holdout weighted F1: 0.950
+- Holdout macro F1 95% CI: 0.488 to 1.000
+- Temporal backtest mean macro F1: 0.956
 
 ## Stage 2 Fault-Family Study
 - Taxonomy: `ground-related`, `phase-to-phase`, `three-phase`, `transformer/internal`, `operational-other`, `unknown/unclassifiable`.
@@ -25,9 +27,19 @@
 - Selected model: logistic-regression
 - Holdout macro F1: 1.000
 - Holdout weighted F1: 1.000
+- Holdout macro F1 95% CI: 1.000 to 1.000
+- Temporal backtest mean macro F1: 0.410
 
 ## Stage 2 Rare-Class Merge
-- Applied mapping: `{'phase-to-phase': 'operational-other', 'three-phase': 'operational-other'}`
+- Applied mapping: `{'three-phase': 'operational-other', 'phase-to-phase': 'operational-other'}`
+
+## Evaluation Upgrades
+- Time-aware rolling-origin backtests are included in both stage metric files.
+- Bootstrap confidence intervals are reported for model holdout metrics.
+- Feature ablation and misclassification exports are written under `outputs/stage1/` and `outputs/stage2/`.
+
+## Domain Validation Pack
+- Expert review templates are written under `outputs/validation/` for event aggregation and stage-2 labels.
 
 ## Notes
 - Clean distribution modeling window spans 2023-01-06 to 2025-12-04.

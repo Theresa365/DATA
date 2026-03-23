@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pandas as pd
@@ -9,6 +10,7 @@ from scada_faults.dataset import run_prepare_data
 from scada_faults.events import load_events, run_build_events
 from scada_faults.modeling import chronological_holdout_split, run_stage1_training, run_stage2_training
 from scada_faults.reports import run_report_results
+from scada_faults.validation import export_domain_validation_pack
 
 
 RAW_COLUMNS = [
@@ -147,6 +149,7 @@ def test_end_to_end_pipeline_and_leakage(tmp_path: Path) -> None:
     build_outputs = run_build_events(tmp_path)
     stage1_outputs = run_stage1_training(tmp_path)
     stage2_outputs = run_stage2_training(tmp_path)
+    validation_outputs = export_domain_validation_pack(tmp_path)
     report_outputs = run_report_results(tmp_path)
 
     for output in [
@@ -154,6 +157,7 @@ def test_end_to_end_pipeline_and_leakage(tmp_path: Path) -> None:
         *build_outputs.values(),
         *stage1_outputs.values(),
         *stage2_outputs.values(),
+        *validation_outputs.values(),
         *report_outputs.values(),
     ]:
         assert Path(output).exists()
@@ -165,3 +169,17 @@ def test_end_to_end_pipeline_and_leakage(tmp_path: Path) -> None:
     clean_events = events.loc[~events["is_chrono_anomaly"].fillna(False)].reset_index(drop=True)
     train_val, holdout = chronological_holdout_split(clean_events)
     assert set(train_val["fault_id"]).isdisjoint(set(holdout["fault_id"]))
+
+    stage1_metrics = json.loads(Path(stage1_outputs["metrics"]).read_text(encoding="utf-8"))
+    stage2_metrics = json.loads(Path(stage2_outputs["metrics"]).read_text(encoding="utf-8"))
+    assert "temporal_backtest" in stage1_metrics
+    assert "feature_ablations" in stage1_metrics
+    assert "error_analysis" in stage1_metrics
+    assert "temporal_backtest" in stage2_metrics
+    assert "feature_ablations" in stage2_metrics
+    assert "error_analysis" in stage2_metrics
+
+    aggregation_review = pd.read_csv(validation_outputs["event_aggregation_review"])
+    label_review = pd.read_csv(validation_outputs["stage2_label_review"])
+    assert {"review_status", "domain_expert_decision", "domain_expert_notes"}.issubset(aggregation_review.columns)
+    assert {"review_status", "domain_expert_label", "domain_expert_notes"}.issubset(label_review.columns)

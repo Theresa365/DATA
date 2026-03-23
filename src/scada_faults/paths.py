@@ -13,6 +13,7 @@ class ProjectPaths:
     prepared: Path
     events: Path
     annotations: Path
+    validation: Path
     stage1: Path
     stage2: Path
     reports: Path
@@ -32,6 +33,7 @@ def project_paths(root: Path | None = None) -> ProjectPaths:
         prepared=outputs / "prepared",
         events=outputs / "events",
         annotations=outputs / "annotations",
+        validation=outputs / "validation",
         stage1=outputs / "stage1",
         stage2=outputs / "stage2",
         reports=outputs / "reports",
@@ -46,6 +48,7 @@ def ensure_output_dirs(root: Path | None = None) -> ProjectPaths:
         paths.prepared,
         paths.events,
         paths.annotations,
+        paths.validation,
         paths.stage1,
         paths.stage2,
         paths.reports,

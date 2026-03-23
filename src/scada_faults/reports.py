@@ -15,10 +15,39 @@ from scada_faults.dataset import run_prepare_data
 from scada_faults.events import load_events, run_build_events
 from scada_faults.modeling import run_stage1_training, run_stage2_training
 from scada_faults.paths import ensure_output_dirs
+from scada_faults.validation import export_domain_validation_pack
 
 
 def _load_json(path: Path) -> dict[str, object]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _format_confidence_interval(metrics: dict[str, object], metric_name: str) -> str | None:
+    confidence_intervals = metrics.get("confidence_intervals")
+    if not isinstance(confidence_intervals, dict):
+        return None
+    metric_interval = confidence_intervals.get(metric_name)
+    if not isinstance(metric_interval, dict):
+        return None
+    lower = metric_interval.get("lower")
+    upper = metric_interval.get("upper")
+    if lower is None or upper is None:
+        return None
+    return f"{float(lower):.3f} to {float(upper):.3f}"
+
+
+def _format_temporal_backtest_mean(metrics: dict[str, object], metric_name: str) -> float | None:
+    temporal_backtest = metrics.get("temporal_backtest")
+    if not isinstance(temporal_backtest, dict):
+        return None
+    summary = temporal_backtest.get("summary")
+    if not isinstance(summary, dict):
+        return None
+    metric_summary = summary.get(metric_name)
+    if not isinstance(metric_summary, dict):
+        return None
+    mean_value = metric_summary.get("mean")
+    return None if mean_value is None else float(mean_value)
 
 
 def _save_bar_plot(series: pd.Series, output_path: Path, title: str, ylabel: str) -> None:
@@ -75,6 +104,12 @@ def build_markdown_report(root: Path | None = None) -> str:
 
     clean_distribution_events = distribution_events.loc[~distribution_events["is_chrono_anomaly"].fillna(False)]
     unknown_labels = int((annotations["final_label"] == "unknown/unclassifiable").sum())
+    stage1_selected_metrics = stage1_metrics["comparisons"][stage1_metrics["selected_model"]]
+    stage2_selected_metrics = stage2_metrics["comparisons"][stage2_metrics["selected_model"]]
+    stage1_ci = _format_confidence_interval(stage1_selected_metrics, "macro_f1")
+    stage2_ci = _format_confidence_interval(stage2_selected_metrics, "macro_f1")
+    stage1_backtest_mean = _format_temporal_backtest_mean(stage1_metrics, "macro_f1")
+    stage2_backtest_mean = _format_temporal_backtest_mean(stage2_metrics, "macro_f1")
 
     lines = [
         "# SCADA Fault Classification Report",
@@ -92,19 +127,33 @@ def build_markdown_report(root: Path | None = None) -> str:
         f"- Holdout events: {stage1_metrics['holdout_events']}",
         f"- Selected model: {stage1_metrics['selected_model']}",
         f"- Selected threshold: {stage1_metrics['selected_threshold']:.2f}",
-        f"- Holdout macro F1: {stage1_metrics['comparisons'][stage1_metrics['selected_model']]['macro_f1']:.3f}",
-        f"- Holdout weighted F1: {stage1_metrics['comparisons'][stage1_metrics['selected_model']]['weighted_f1']:.3f}",
-        "",
-        "## Stage 2 Fault-Family Study",
-        "- Taxonomy: `ground-related`, `phase-to-phase`, `three-phase`, `transformer/internal`, `operational-other`, `unknown/unclassifiable`.",
-        f"- Curated distribution events: {len(annotations)}",
-        f"- Unknown/unclassifiable events retained for QA only: {unknown_labels}",
-        f"- Train/validation events: {stage2_metrics['train_events']}",
-        f"- Holdout events: {stage2_metrics['holdout_events']}",
-        f"- Selected model: {stage2_metrics['selected_model']}",
-        f"- Holdout macro F1: {stage2_metrics['comparisons'][stage2_metrics['selected_model']]['macro_f1']:.3f}",
-        f"- Holdout weighted F1: {stage2_metrics['comparisons'][stage2_metrics['selected_model']]['weighted_f1']:.3f}",
+        f"- Holdout macro F1: {stage1_selected_metrics['macro_f1']:.3f}",
+        f"- Holdout weighted F1: {stage1_selected_metrics['weighted_f1']:.3f}",
     ]
+
+    if stage1_ci is not None:
+        lines.append(f"- Holdout macro F1 95% CI: {stage1_ci}")
+    if stage1_backtest_mean is not None:
+        lines.append(f"- Temporal backtest mean macro F1: {stage1_backtest_mean:.3f}")
+
+    lines.extend(
+        [
+            "",
+            "## Stage 2 Fault-Family Study",
+            "- Taxonomy: `ground-related`, `phase-to-phase`, `three-phase`, `transformer/internal`, `operational-other`, `unknown/unclassifiable`.",
+            f"- Curated distribution events: {len(annotations)}",
+            f"- Unknown/unclassifiable events retained for QA only: {unknown_labels}",
+            f"- Train/validation events: {stage2_metrics['train_events']}",
+            f"- Holdout events: {stage2_metrics['holdout_events']}",
+            f"- Selected model: {stage2_metrics['selected_model']}",
+            f"- Holdout macro F1: {stage2_selected_metrics['macro_f1']:.3f}",
+            f"- Holdout weighted F1: {stage2_selected_metrics['weighted_f1']:.3f}",
+        ]
+    )
+    if stage2_ci is not None:
+        lines.append(f"- Holdout macro F1 95% CI: {stage2_ci}")
+    if stage2_backtest_mean is not None:
+        lines.append(f"- Temporal backtest mean macro F1: {stage2_backtest_mean:.3f}")
 
     class_merge_mapping = stage2_metrics.get("class_merge_mapping", {})
     if class_merge_mapping:
@@ -112,6 +161,14 @@ def build_markdown_report(root: Path | None = None) -> str:
 
     lines.extend(
         [
+            "",
+            "## Evaluation Upgrades",
+            "- Time-aware rolling-origin backtests are included in both stage metric files.",
+            "- Bootstrap confidence intervals are reported for model holdout metrics.",
+            "- Feature ablation and misclassification exports are written under `outputs/stage1/` and `outputs/stage2/`.",
+            "",
+            "## Domain Validation Pack",
+            "- Expert review templates are written under `outputs/validation/` for event aggregation and stage-2 labels.",
             "",
             "## Notes",
             f"- Clean distribution modeling window spans {clean_distribution_events['event_date'].min().date()} to {clean_distribution_events['event_date'].max().date()}.",
@@ -135,9 +192,11 @@ def run_report_results(root: Path | None = None) -> dict[str, Path]:
         run_stage2_training(root)
 
     figure_paths = generate_figures(root)
+    validation_paths = export_domain_validation_pack(root)
     report_markdown = build_markdown_report(root)
     report_path = paths.reports / "summary.md"
     report_path.write_text(report_markdown, encoding="utf-8")
     output_paths = {"report": report_path}
     output_paths.update(figure_paths)
+    output_paths.update(validation_paths)
     return output_paths
