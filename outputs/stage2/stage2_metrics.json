@@ -3,8 +3,8 @@
   "train_events": 78,
   "holdout_events": 20,
   "class_merge_mapping": {
-    "three-phase": "operational-other",
-    "phase-to-phase": "operational-other"
+    "phase-to-phase": "operational-other",
+    "three-phase": "operational-other"
   },
   "comparisons": {
     "majority-baseline": {

@@ -61,12 +61,19 @@ def ensure_output_dirs(root: Path | None = None) -> ProjectPaths:
 def discover_raw_workbooks(root: Path | None = None) -> dict[str, Path]:
     base = root or repo_root()
     mapping = {
-        "distribution": list(base.glob("*Distribution only*.xlsx")),
+        "distribution": sorted(
+            [
+                *base.glob("*Distribution only*.xlsx"),
+                *base.glob("*Distribution GIT*.xlsx"),
+            ]
+        ),
         "system": list(base.glob("*system type*.xlsx")),
     }
     resolved: dict[str, Path] = {}
     for source_name, matches in mapping.items():
         if not matches:
+            if source_name == "system":
+                continue
             raise FileNotFoundError(f"Could not locate workbook for source '{source_name}' in {base}")
         resolved[source_name] = matches[0]
     return resolved

@@ -183,3 +183,28 @@ def test_end_to_end_pipeline_and_leakage(tmp_path: Path) -> None:
     label_review = pd.read_csv(validation_outputs["stage2_label_review"])
     assert {"review_status", "domain_expert_decision", "domain_expert_notes"}.issubset(aggregation_review.columns)
     assert {"review_status", "domain_expert_label", "domain_expert_notes"}.issubset(label_review.columns)
+
+
+def test_prepare_data_accepts_distribution_git_filename(tmp_path: Path) -> None:
+    distribution_df = pd.DataFrame(
+        [
+            _build_row(
+                "01/01/2023",
+                "08:30",
+                "001/23",
+                "Station A Transformer 1",
+                "Earth Fault (E/F) protection trip",
+                "Permanent",
+                "High",
+            )
+        ],
+        columns=RAW_COLUMNS,
+    )
+    distribution_path = tmp_path / "Monthly Fault Data Analysis Jan2023_June2025 Distribution GIT (1).xlsx"
+    distribution_df.to_excel(distribution_path, index=False)
+
+    prepare_outputs = run_prepare_data(tmp_path)
+
+    assert Path(prepare_outputs["distribution"]).exists()
+    prepared_rows = pd.read_csv(prepare_outputs["distribution"])
+    assert prepared_rows["source_file"].iloc[0] == distribution_path.name

@@ -20,6 +20,16 @@ Requires-Dist: xgboost>=2.0; extra == "extras"
 
 This repository turns the Botswana Power Corporation SCADA fault workbooks into a small reproducible machine-learning project built around event-level fault incidents.
 
+It should be read as an introductory technical-paper testbed and research proposal, not as a finished production system or a definitive scientific result. The current work is intended to show that the data can be cleaned, structured, and evaluated in a reproducible way, while surfacing the methodological questions that a stronger technical paper would need to answer.
+
+In that sense, this project is closer to a proposal for a larger study:
+- a first-pass event construction pipeline from messy SCADA workbooks
+- an initial benchmark for fault classification tasks
+- an evaluation scaffold for more rigorous future experiments
+- a review pack for domain experts to validate aggregation and labeling assumptions
+
+The outputs in this repository should therefore be interpreted as exploratory evidence and a foundation for a technical paper, rather than final claims about operational deployment performance.
+
 ## Workflow
 
 Install the project in editable mode:
@@ -31,12 +41,12 @@ python -m pip install -e .[dev]
 Run the pipeline:
 
 ```powershell
-prepare-data
-build-events
-draft-stage2-labels
-train-stage1
-train-stage2
-report-results
+python -m scada_faults.cli prepare-data
+python -m scada_faults.cli build-events
+python -m scada_faults.cli draft-stage2-labels
+python -m scada_faults.cli train-stage1
+python -m scada_faults.cli train-stage2
+python -m scada_faults.cli report-results
 ```
 
 Generated artifacts are written under `outputs/`.
@@ -49,6 +59,14 @@ Generated artifacts are written under `outputs/`.
 - Benchmarks a stage-1 operational model for `Permanent` vs `Non-permanent`.
 - Generates and curates stage-2 electrical fault-family labels for distribution events.
 - Produces metrics, predictions, figures, and a Markdown summary report.
+- Adds time-aware backtests, bootstrap confidence intervals, feature ablations, and holdout error-analysis exports.
+- Exports domain-expert review packs for validating event aggregation and stage-2 labels.
+
+## Current Scope
+
+- This is an introductory test of whether the available SCADA records can support a paper-worthy fault-analysis workflow.
+- The modeling results are best treated as proposal-stage benchmarks, not final validated performance claims.
+- The repo is designed to make the next research steps easier: stronger validation, expert review, richer feature engineering, and a more defensible technical paper.
 
 ## Project Layout
 
@@ -56,3 +74,10 @@ Generated artifacts are written under `outputs/`.
 - `tests/`: parser, event-building, leakage, and smoke tests
 - `notebooks/`: exploratory notebook scaffold
 - `outputs/`: generated data, metrics, and reports
+
+## Evaluation Artifacts
+
+- `outputs/stage1/stage1_metrics.json` and `outputs/stage2/stage2_metrics.json` now include rolling-origin backtests and holdout confidence intervals.
+- `outputs/stage1/*feature_ablations.csv` and `outputs/stage2/*feature_ablations.csv` compare performance with text, categorical, and numeric feature groups removed.
+- `outputs/stage1/*error_analysis.csv` and `outputs/stage2/*error_analysis.csv` list holdout mistakes for manual inspection.
+- `outputs/validation/` contains CSV templates for domain experts to review event aggregation and electrical fault-family labels.

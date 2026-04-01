@@ -31,7 +31,7 @@
 - Temporal backtest mean macro F1: 0.410
 
 ## Stage 2 Rare-Class Merge
-- Applied mapping: `{'three-phase': 'operational-other', 'phase-to-phase': 'operational-other'}`
+- Applied mapping: `{'phase-to-phase': 'operational-other', 'three-phase': 'operational-other'}`
 
 ## Evaluation Upgrades
 - Time-aware rolling-origin backtests are included in both stage metric files.
@@ -42,5 +42,5 @@
 - Expert review templates are written under `outputs/validation/` for event aggregation and stage-2 labels.
 
 ## Notes
-- Clean distribution modeling window spans 2023-01-06 to 2025-12-04.
+- Clean distribution modeling window spans 2023-01-17 to 2025-06-25.
 - Results should be treated as exploratory because the event sample is small and utility-specific.
