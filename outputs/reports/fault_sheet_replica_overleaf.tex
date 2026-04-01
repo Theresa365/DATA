@@ -1,0 +1,67 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1.2cm]{geometry}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{ragged2e}
+\usepackage[T1]{fontenc}
+
+\renewcommand{\arraystretch}{1.35}
+\setlength{\tabcolsep}{4pt}
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
+\newcommand{\hdr}[1]{\bfseries\footnotesize #1}
+\newcommand{\val}[1]{\footnotesize #1}
+
+\begin{document}
+\thispagestyle{empty}
+
+\begin{center}
+{\bfseries BOTSWANA POWER CORPORATION}
+\end{center}
+
+\noindent
+\begin{tabular}{|L{2.2cm}|L{6.5cm}|}
+\hline
+\bfseries FAULT NO: & \centering\arraybackslash \bfseries 060/22 \\ \hline
+\end{tabular}
+
+\vspace{0.6cm}
+
+\noindent
+\begin{tabular}{|L{2.2cm}|L{6.5cm}|L{1.8cm}|L{4.8cm}|L{3.2cm}|L{1.6cm}|L{1.9cm}|L{2.3cm}|}
+\hline
+\hdr{DAY/DATE} & \val{Monday 25 February 2024} & \hdr{WEATHER} & \val{CLEAR} & \hdr{VOLTAGE LEVEL} & \val{132/11k} & \hdr{AREA:} & \val{South} \\ \hline
+\hdr{TIME} & \hdr{APPARATUS TRIPPED} & \multicolumn{2}{L{6.6cm}|}{\hdr{PROTECTION INDICATIONS}} & \hdr{TIME RECLOSED} & \multicolumn{2}{L{3.5cm}|}{\centering\arraybackslash\hdr{REPORTED BY}} & \makecell[l]{\hdr{BREAKER}\\[-1pt]\hdr{SEQUENCE}} \\ \hline
+\end{tabular}
+
+\noindent
+\begin{tabular}{|L{2.2cm}|L{6.5cm}|L{7.3cm}|L{3.0cm}|L{2.2cm}|L{2.0cm}|}
+\hline
+ & Gab East 132/11 kV T1B : HV CB 110B & did not trip & & & \\ \hline
+ & : LV CB 1H0B & did not trip & & & \\ \hline
+12h52 & Gab East 132/11 kV T1A : HV CB 110A & O/C \& E/F : A \& B To Ground & 14h08 & SCADA/R. Galetshets & Tripped \\ \hline
+ & : LV CB 1H0A & O/C \& E/F : A \& B To Ground & 14h14 & SCADA/R. Galetshets & Tripped \\ \hline
+ & & & & & \\ \hline
+ & & & & & \\ \hline
+ & & & & & \\ \hline
+ & & & & & \\ \hline
+\end{tabular}
+
+\vspace{0.4cm}
+
+\noindent
+\begin{tabular}{|L{23.9cm}|}
+\hline
+\bfseries OPERATIONS CARRIED OUT \\ \hline
+CSS requested to close one feeder at a time and 132/11 kV Transformer 1A closed first and Transformer 2A followed and they both held. \\ \hline
+\\ \hline
+\\ \hline
+\bfseries LINE INSPECTION ETC \\ \hline
+CSS advised fault was due to one of the feeders CB failed to trip during fault, hence through fault. \\ \hline
+\end{tabular}
+
+\end{document}

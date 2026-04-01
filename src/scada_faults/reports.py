@@ -94,31 +94,32 @@ def _draw_fault_sheet_replica(output_path: Path) -> None:
     for y in [41.5, 39.1, 36.7, 34.3, 31.9, 29.5, 27.1, 24.7, 22.3, 19.9, 17.5, 15.1, 12.7, 10.3, 7.9, 5.5, 3.1]:
         hline(y, lw=0.85)
 
-    for x in [9.5, 36.5, 66.0, 78.0, 91.0]:
+    for x in [9.5, 36.5, 66.0, 78.0, 85.0, 91.0]:
         vline(x, 21.0, 43.9, lw=1.0)
     vline(99.5, 1.1, 43.9, lw=1.6)
     vline(9.5, 21.0, 48.8, lw=1.0)
     vline(36.5, 21.0, 43.9, lw=1.0)
     vline(66.0, 21.0, 43.9, lw=1.0)
     vline(78.0, 21.0, 43.9, lw=1.0)
+    vline(85.0, 39.1, 43.9, lw=1.0)
     vline(91.0, 21.0, 43.9, lw=1.0)
 
     label(1.0, 42.3, "DAY/DATE", weight="bold")
     label(10.0, 42.3, "Monday 25 February 2024", weight="bold")
     label(36.8, 42.3, "WEATHER", weight="bold")
     label(43.5, 42.3, "CLEAR", weight="bold")
-    label(66.3, 42.3, "VOLTAGE LEVEL", weight="bold")
-    label(78.5, 42.3, "132/11k", weight="bold")
-    label(91.3, 42.3, "AREA:", weight="bold")
-    label(96.0, 42.3, "South", weight="bold", ha="center")
+    label(66.3, 42.3, "VOLTAGE LEVEL", size=8.1, weight="bold")
+    label(78.4, 42.3, "132/11k", size=8.1, weight="bold")
+    label(85.3, 42.3, "AREA:", size=8.1, weight="bold")
+    label(95.0, 42.3, "South", size=8.1, weight="bold", ha="center")
 
     label(1.0, 40.0, "TIME", weight="bold")
     label(10.0, 40.0, "APPARATUS TRIPPED", weight="bold")
     label(36.8, 40.0, "PROTECTION INDICATIONS", weight="bold")
-    label(66.3, 40.0, "TIME RECLOSED", weight="bold")
-    label(79.8, 40.0, "REPORTED BY", weight="bold")
-    label(91.3, 40.0, "BREAKER", weight="bold")
-    label(91.3, 38.5, "SEQUENCE", weight="bold")
+    label(66.3, 40.0, "TIME RECLOSED", size=8.1, weight="bold")
+    label(84.5, 40.0, "REPORTED BY", size=8.1, weight="bold", ha="center")
+    label(91.3, 40.0, "BREAKER", size=8.1, weight="bold")
+    label(91.3, 38.5, "SEQUENCE", size=8.1, weight="bold")
 
     row_y = [35.5, 33.1, 30.7, 28.3]
     label(10.0, row_y[0], "Gab East 132/11 kV T1B : HV CB 110B")
