@@ -9,6 +9,7 @@ import matplotlib
 import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 
 from scada_faults.curation import load_stage2_annotations
 from scada_faults.dataset import run_prepare_data
@@ -62,6 +63,108 @@ def _save_bar_plot(series: pd.Series, output_path: Path, title: str, ylabel: str
     plt.close(fig)
 
 
+def _draw_fault_sheet_replica(output_path: Path) -> None:
+    fig, ax = plt.subplots(figsize=(12, 6.15))
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 52)
+    ax.axis("off")
+
+    line_color = "#111111"
+    green = "#1b8a5a"
+    font = {"fontfamily": "DejaVu Serif", "color": "#1a1a1a"}
+
+    def hline(y: float, lw: float = 1.0, color: str = line_color) -> None:
+        ax.plot([0.5, 99.5], [y, y], color=color, lw=lw)
+
+    def vline(x: float, y0: float, y1: float, lw: float = 1.0, color: str = line_color) -> None:
+        ax.plot([x, x], [y0, y1], color=color, lw=lw)
+
+    def label(x: float, y: float, text: str, size: float = 8.6, weight: str = "normal", ha: str = "left") -> None:
+        ax.text(x, y, text, fontsize=size, fontweight=weight, ha=ha, va="center", **font)
+
+    hline(51.0, lw=1.6, color=green)
+    hline(49.2, lw=1.0)
+    label(40, 50.1, "BOTSWANA POWER CORPORATION", size=9.2, weight="bold", ha="center")
+
+    label(1.0, 47.6, "FAULT NO:", size=8.8, weight="bold")
+    ax.add_patch(Rectangle((9.5, 46.4), 27, 2.4, fill=False, ec=line_color, lw=1.6))
+    label(23.0, 47.6, "060/22", size=8.6, weight="bold", ha="center")
+
+    hline(43.9, lw=1.0)
+    for y in [41.5, 39.1, 36.7, 34.3, 31.9, 29.5, 27.1, 24.7, 22.3, 19.9, 17.5, 15.1, 12.7, 10.3, 7.9, 5.5, 3.1]:
+        hline(y, lw=0.85)
+
+    for x in [9.5, 36.5, 66.0, 78.0, 91.0]:
+        vline(x, 21.0, 43.9, lw=1.0)
+    vline(99.5, 1.1, 43.9, lw=1.6)
+    vline(9.5, 21.0, 48.8, lw=1.0)
+    vline(36.5, 21.0, 43.9, lw=1.0)
+    vline(66.0, 21.0, 43.9, lw=1.0)
+    vline(78.0, 21.0, 43.9, lw=1.0)
+    vline(91.0, 21.0, 43.9, lw=1.0)
+
+    label(1.0, 42.3, "DAY/DATE", weight="bold")
+    label(10.0, 42.3, "Monday 25 February 2024", weight="bold")
+    label(36.8, 42.3, "WEATHER", weight="bold")
+    label(43.5, 42.3, "CLEAR", weight="bold")
+    label(66.3, 42.3, "VOLTAGE LEVEL", weight="bold")
+    label(78.5, 42.3, "132/11k", weight="bold")
+    label(91.3, 42.3, "AREA:", weight="bold")
+    label(96.0, 42.3, "South", weight="bold", ha="center")
+
+    label(1.0, 40.0, "TIME", weight="bold")
+    label(10.0, 40.0, "APPARATUS TRIPPED", weight="bold")
+    label(36.8, 40.0, "PROTECTION INDICATIONS", weight="bold")
+    label(66.3, 40.0, "TIME RECLOSED", weight="bold")
+    label(79.8, 40.0, "REPORTED BY", weight="bold")
+    label(91.3, 40.0, "BREAKER", weight="bold")
+    label(91.3, 38.5, "SEQUENCE", weight="bold")
+
+    row_y = [35.5, 33.1, 30.7, 28.3]
+    label(10.0, row_y[0], "Gab East 132/11 kV T1B : HV CB 110B")
+    label(36.8, row_y[0], "did not trip")
+
+    label(23.7, row_y[1], ": LV CB 1H0B")
+    label(36.8, row_y[1], "did not trip")
+
+    label(1.0, row_y[2], "12h52")
+    label(10.0, row_y[2], "Gab East 132/11 kV T1A : HV CB 110A")
+    label(36.8, row_y[2], "O/C & E/F : A & B To Ground")
+    label(66.3, row_y[2], "14h08")
+    label(78.5, row_y[2], "SCADA/R. Galetshets")
+    label(91.3, row_y[2], "Tripped")
+
+    label(23.7, row_y[3], ": LV CB 1H0A")
+    label(36.8, row_y[3], "O/C & E/F : A & B To Ground")
+    label(66.3, row_y[3], "14h14")
+    label(78.5, row_y[3], "SCADA/R. Galetshets")
+    label(91.3, row_y[3], "Tripped")
+
+    hline(21.0, lw=1.2)
+    label(1.0, 19.4, "OPERATIONS CARRIED OUT", size=8.8, weight="bold")
+    hline(18.4, lw=1.0)
+    hline(16.2, lw=1.4, color=green)
+    label(
+        1.0,
+        13.9,
+        "CSS requested to close one feeder at a time and 132/11 kV Transformer 1A closed first and Transformer 2A followed and they both held.",
+        size=8.4,
+    )
+    hline(8.3, lw=1.0)
+    label(1.0, 4.6, "LINE INSPECTION ETC", size=8.8, weight="bold")
+    hline(3.7, lw=1.0)
+    label(
+        1.0,
+        2.1,
+        "CSS advised fault was due to one of the feeders CB failed to trip during fault, hence through fault.",
+        size=8.4,
+    )
+    ax.add_patch(Rectangle((0.6, 1.1), 98.9, 15.1, fill=False, ec="none", lw=0))
+    fig.tight_layout(pad=0.4)
+    fig.savefig(output_path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def generate_figures(root: Path | None = None) -> dict[str, Path]:
     paths = ensure_output_dirs(root)
     distribution_events = load_events(root, source_name="distribution")
@@ -72,6 +175,7 @@ def generate_figures(root: Path | None = None) -> dict[str, Path]:
         "stage1_label_counts": paths.figures / "stage1_label_counts.png",
         "weather_counts": paths.figures / "distribution_weather_counts.png",
         "stage2_label_counts": paths.figures / "stage2_label_counts.png",
+        "fault_sheet_replica": paths.figures / "fault_sheet_replica.png",
     }
 
     monthly_counts = (
@@ -88,6 +192,7 @@ def generate_figures(root: Path | None = None) -> dict[str, Path]:
     _save_bar_plot(stage1_counts, figure_paths["stage1_label_counts"], "Stage 1 Label Counts", "Events")
     _save_bar_plot(weather_counts, figure_paths["weather_counts"], "Distribution Weather Counts", "Events")
     _save_bar_plot(stage2_counts, figure_paths["stage2_label_counts"], "Stage 2 Final Label Counts", "Events")
+    _draw_fault_sheet_replica(figure_paths["fault_sheet_replica"])
     return figure_paths
 
 
